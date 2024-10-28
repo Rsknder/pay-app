@@ -2,6 +2,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environments } from '../environments/environment';
 import { catchError, Subject, tap, throwError } from 'rxjs';
+import { Payment } from '../interfaces/interface';
 
 @Injectable({
   providedIn: 'root'
@@ -16,37 +17,45 @@ export class PayService {
   ) {
   }
 
-  auth(user: any) {
-    return this.http.post('https://fakestoreapi.com/auth/login', { username: "mor_2314", password: "83r5^_" })
-
-      .pipe(
-
-        // return this.http.post(`${environments.url}`, user).pipe(
-        tap(this.Authorized),
+  auth(user: string) {
+   return this.http.post(`${environments.url}`, {user}).pipe(
         catchError(this.handleError.bind(this))
       );
-
-
-
   };
 
-  Authorized(response: any) {
-    console.log('response', response)
-    if (response) {
-      this.isAuthorized = true;
-    }
+  pay(payment: Payment) {
+if (!this.validatePayment(payment,'Pay'))
+  { this.error$.next('invalid validation on pay service!')
+   return this.error$
   }
-
-  pay() {
-
+  return this.http.post(`${environments.url}`, payment).pipe(
+   catchError(this.handleError.bind(this))
+    );
   };
 
-  reject() {
+  reject(payment: Payment) {
 
+    if (!this.validatePayment(payment,'Reject'))
+      { this.error$.next('invalid validation on reject service!')
+       return this.error$
+      }
+     return this.http.post(`${environments.url}`, payment).pipe(
+      catchError(this.handleError.bind(this))
+    );
   };
+
+  private validatePayment (payment: Payment, type: any) {
+    if (  
+      payment.cardHolder.length < 1 ||
+      payment.cardNumber.length < 16 ||
+      payment.validity.length < 5 ||
+      !payment.cvv ||
+      payment.operation !==type ||
+      (type === "Reject" && !payment.receiptNumber) 
+    ) { return false;}
+    return true;  }
 
   private handleError(error: HttpErrorResponse) {
-    // console.error('An error occurred:', error['message']);
     switch (error.status) {
       case 0:
         this.error$.next(error['message'])
@@ -59,7 +68,6 @@ export class PayService {
         break
 
     }
-
 
     return throwError(error)
   }

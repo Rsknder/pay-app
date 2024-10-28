@@ -1,7 +1,18 @@
 <h1>Pay App</h1>
-<button (click)="onAutorize()">Autorization</button>
-<button (click)="onClicked2()" [disabled]="!isAutorized">SEND REQUEST 2</button>
-<button (click)="onClicked3()" [disabled]="!isAutorized">SEND REQUEST 2</button>
+<div>
+  <p>{{payment.receiptNumber}}</p>
+  <p>{{payment.cardNumber}}</p>
+  <p>{{payment.cardHolder}}</p>
+  <p>{{payment.validity}}</p>
+  <p>{{payment.cvv}}</p>
+  <p>{{payment.amount}}</p>
+</div>
+  
+<div>
+  <button (click)="onClickedAuthorization()"> Authorization</button>
+  <button (click)="onClickedPay()" [disabled]="!isAuthorized">Pay</button>
+  <button (click)="onClickedReject()" [disabled]="!isAuthorized">Reject</button>
+</div>
 
 <div *ngIf="payService.error$ | async as error">
   {{ error }}
